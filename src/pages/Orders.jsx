@@ -1,7 +1,7 @@
 
 
 import React from 'react';
-import { Package, ChevronRight } from 'lucide-react';
+import { Package,} from 'lucide-react';
 
 function Orders() {
   const orders = []; // Replace with actual orders

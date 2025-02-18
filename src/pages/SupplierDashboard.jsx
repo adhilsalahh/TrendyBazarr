@@ -33,7 +33,6 @@ function SupplierDashboard() {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [showAddProduct, setShowAddProduct] = useState(false);
   const [activeTab, setActiveTab] = useState('products');
-  const [selectedProduct, setSelectedProduct] = useState(null);
   const [notifications, setNotifications] = useState([
     {
       id: '1',

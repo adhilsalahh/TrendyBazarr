@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState } from 'react';
 import {
   LayoutDashboard,
@@ -173,7 +169,7 @@ const orders = [
 
 function AdminPanel() {
   const [activeMenu, setActiveMenu] = useState('dashboard');
-  const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
+  const [expandedMenu, setExpandedMenu] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);

@@ -22,7 +22,6 @@ export default function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [touchStart, setTouchStart] = useState(0);
   const [touchEnd, setTouchEnd] = useState(0);
-  const [autoPlay, setAutoPlay] = useState(true);
   const slideRef = useRef(null);
 
   const nextSlide = () => {
@@ -60,12 +59,9 @@ export default function Hero() {
   };
 
   useEffect(() => {
-    let interval;
-    if (autoPlay) {
-      interval = setInterval(nextSlide, 5000);
-    }
+    const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, [autoPlay]);
+  }, []);
 
   return (
     <div 
@@ -78,15 +74,10 @@ export default function Hero() {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-transform duration-500 ease-in-out ${
-            index === currentSlide ? 'translate-x-0' : 'translate-x-full'
-          }`}
+          className={`absolute inset-0 transition-transform duration-500 ease-in-out ${index === currentSlide ? 'translate-x-0' : 'translate-x-full'}`}
           style={{ touchAction: 'pan-y pinch-zoom' }}
         >
-          <div
-            className="absolute inset-0 bg-cover bg-center"
-            style={{ backgroundImage: `url(${slide.image})` }}
-          >
+          <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url(${slide.image})` }}>
             <div className="absolute inset-0 bg-black bg-opacity-40" />
           </div>
           <div className="relative h-full flex items-center justify-center text-white px-4">
@@ -97,9 +88,7 @@ export default function Hero() {
               </div>
               <p className="text-xs sm:text-xl lg:text-2xl max-w-3xl mx-auto text-gray-200">{slide.description}</p>
               <div className="flex items-center justify-center">
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full 
-                                text-sm sm:text-xl font-semibold transition-all duration-300
-                                transform hover:scale-105 hover:shadow-lg">
+                <button className="bg-indigo-600 hover:bg-indigo-700 text-white px-8 py-3 rounded-full text-sm sm:text-xl font-semibold transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
                   {slide.cta}
                 </button>
               </div>
@@ -110,15 +99,13 @@ export default function Hero() {
 
       <button
         onClick={prevSlide}
-        className="hidden sm:block absolute left-12 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 
-                 text-white p-5 rounded-full transition-all duration-300 transform hover:scale-110"
+        className="hidden sm:block absolute left-12 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-5 rounded-full transition-all duration-300 transform hover:scale-110"
       >
         <ChevronLeft className="h-8 w-8" />
       </button>
       <button
         onClick={nextSlide}
-        className="hidden sm:block absolute right-12 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 
-                 text-white p-5 rounded-full transition-all duration-300 transform hover:scale-110"
+        className="hidden sm:block absolute right-12 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/75 text-white p-5 rounded-full transition-all duration-300 transform hover:scale-110"
       >
         <ChevronRight className="h-8 w-8" />
       </button>
@@ -128,9 +115,7 @@ export default function Hero() {
           <button
             key={index}
             onClick={() => setCurrentSlide(index)}
-            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-              index === currentSlide ? 'bg-white' : 'bg-white bg-opacity-50'
-            }`}
+            className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${index === currentSlide ? 'bg-white' : 'bg-white bg-opacity-50'}`}
           />
         ))}
       </div>

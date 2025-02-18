@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Star, Heart, ShoppingCart, Share2, Truck, Package, Shield } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
+import { someFunction, someConstant } from './utils'; // Example import
 
 // Export products data
 export const products = {
@@ -258,6 +259,8 @@ export default function ProductPage() {
   const [notificationMessage, setNotificationMessage] = useState('');
   const [showShareMenu, setShowShareMenu] = useState(false);
   const { addToCart, toggleWishlist, wishlist } = useShop();
+  console.log(someConstant);
+  someFunction();
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();

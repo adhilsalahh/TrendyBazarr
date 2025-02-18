@@ -1,5 +1,5 @@
-
-import React, { createContext, useContext, useState, useEffect } from 'react';
+// src/context/ShopContext.js
+import React, { createContext, useState, useEffect } from 'react';
 
 const ShopContext = createContext();
 
@@ -67,10 +67,4 @@ export function ShopProvider({ children }) {
   );
 }
 
-export function useShop() {
-  const context = useContext(ShopContext);
-  if (context === undefined) {
-    throw new Error('useShop must be used within a ShopProvider');
-  }
-  return context;
-}
+export { ShopContext };

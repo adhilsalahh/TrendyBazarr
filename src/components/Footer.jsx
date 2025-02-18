@@ -5,11 +5,15 @@ import {
   Twitter, 
   Instagram, 
   Youtube, 
-  ArrowUp,
+  ArrowUp,  // Added ArrowUp
   Mail
 } from 'lucide-react';
 
 export default function Footer() {
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
   return (
     <footer className="bg-blue-900 text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -91,7 +95,7 @@ export default function Footer() {
         <div className="mt-8 pt-8 border-t border-white/20">
           <div className="flex justify-between items-center">
             <div className="flex space-x-6">
-              {[
+              {[ 
                 { Icon: Facebook, link: 'https://facebook.com' },
                 { Icon: Twitter, link: 'https://twitter.com' },
                 { Icon: Instagram, link: 'https://instagram.com' },
@@ -113,6 +117,16 @@ export default function Footer() {
             © {new Date().getFullYear()} ShopHub. All rights reserved.
           </p>
         </div>
+      </div>
+
+      {/* Back to top button */}
+      <div className="fixed bottom-4 right-4">
+        <button
+          onClick={scrollToTop}
+          className="bg-blue-600 text-white p-3 rounded-full hover:bg-blue-700 transition-colors duration-200"
+        >
+          <ArrowUp className="h-5 w-5" />
+        </button>
       </div>
     </footer>
   );
