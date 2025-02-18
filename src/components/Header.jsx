@@ -119,14 +119,14 @@ export default function Header({ isDarkMode, toggleDarkMode }) {
 
           {/* Logo */}
           <Link to="/" className="flex-shrink-0 flex items-center transform hover:scale-105 transition-all duration-300">
-            <div className="flex items-center">
+            <div className="flex items-center pl-5">
               <div className="w-8 h-8 md:w-12 md:h-12 bg-gradient-to-br from-yellow-400 to-orange-500 
                            rounded-lg flex items-center justify-center transform rotate-12 hover:rotate-0 
                            transition-all duration-300">
                 <ShoppingBag className="h-5 w-5 md:h-6 md:w-6 text-white" />
               </div>
               <div>
-                <h1 className="ml-2 md:ml-3 text-2xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 
+                <h1 className="ml-2 md:ml-3 text-3xl sm:text-3xl md:text-4xl font-bold bg-gradient-to-r from-yellow-200 
                              to-orange-100 bg-clip-text text-transparent hover:from-orange-100 
                              hover:to-yellow-200 transition-all duration-300">
                   Trendy Bazar

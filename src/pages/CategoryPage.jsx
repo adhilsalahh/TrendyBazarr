@@ -523,6 +523,7 @@ function CategoryPage() {
                     className="w-full h-32 sm:h-48 object-cover transform transition-transform 
                              duration-300 group-hover:scale-105"
                   />
+                  
                   <button
                     onClick={() => {
                       toggleWishlist(product);
