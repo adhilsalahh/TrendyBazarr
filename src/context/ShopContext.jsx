@@ -1,7 +1,14 @@
-// src/context/ShopContext.js
-import React, { createContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect, useContext } from 'react';
 
 const ShopContext = createContext();
+
+export function useShop() {
+  const context = useContext(ShopContext);
+  if (context === undefined) {
+    throw new Error('useShop must be used within a ShopProvider');
+  }
+  return context;
+}
 
 export function ShopProvider({ children }) {
   const [cart, setCart] = useState([]);
@@ -67,4 +74,4 @@ export function ShopProvider({ children }) {
   );
 }
 
-export { ShopContext };
+export { ShopContext }

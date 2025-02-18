@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
+import { ShopProvider } from './context/ShopContext';
 import './index.css';
 
 const rootElement = document.getElementById('root');
@@ -13,6 +14,8 @@ const root = createRoot(rootElement);
 
 root.render(
   <StrictMode>
-    <App />
+    <ShopProvider>
+      <App />
+    </ShopProvider>
   </StrictMode>
 );
