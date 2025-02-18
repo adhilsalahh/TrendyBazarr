@@ -26,12 +26,11 @@ import PrivacyPolicy from './pages/PrivacyPolicy';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
-import { ShopProvider } from './context/ShopContext';
 import Layout from './components/Layout';
 import Products from './pages/Products';
 import CategoryPage from './pages/CategoryPage';
 import ProductPage from './pages/ProductPage';
-import Adminpage from './pages/AdminPanel';
+import AdminPanel from './pages/AdminPanel';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -53,53 +52,51 @@ function App() {
 
   return (
     <Router>
-      <ShopProvider>
       <ScrollToTop />
       <div className={`min-h-screen ${isDarkMode ? 'dark' : ''}`}>
         <Layout>
-        <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
-          <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
-          <Routes>
-            <Route path="/" element={
-              <main>
-                <div>
-                  <Hero />
-                  <Features />
-                  <Categories />
-                  <FeaturedProducts />
-                </div>
-              </main>
-            } />
-            <Route path="/products" element={<Products />} />
-            <Route path="/category/:category" element={<CategoryPage />} />
-            <Route path="/product/:id" element={<ProductPage />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/orders" element={<Orders />} />
-            <Route path="/wishlist" element={<Wishlist />} />
-            <Route path="/cart" element={<Cart />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="/help" element={<Help />} />
-            <Route path="/shipping-info" element={<ShippingInfo />} />
-            <Route path="/return-policy" element={<ReturnPolicy />} />
-            <Route path="/track-order" element={<TrackOrder />} />
-            <Route path="/size-guide" element={<SizeGuide />} />
-            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
-            <Route path="/about-us" element={<About />} />
-            <Route path="/contact-us" element={<Contact />} />
-            <Route path="/faqs" element={<FAQ />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/address-list" element={<AddressList />} />
-            <Route path="/supplier/login" element={<SupplierLogin />} />
-            <Route path="/supplier/register" element={<SupplierRegister />} />
-            <Route path="/admin/registe" element={<Adminpage />} />
-          </Routes>
-          <Footer />
-        </div>
+          <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
+            <Header isDarkMode={isDarkMode} toggleDarkMode={toggleDarkMode} />
+            <Routes>
+              <Route path="/" element={
+                <main>
+                  <div>
+                    <Hero />
+                    <Features />
+                    <Categories />
+                    <FeaturedProducts />
+                  </div>
+                </main>
+              } />
+              <Route path="/products" element={<Products />} />
+              <Route path="/category/:category" element={<CategoryPage />} />
+              <Route path="/product/:id" element={<ProductPage />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/orders" element={<Orders />} />
+              <Route path="/wishlist" element={<Wishlist />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/checkout" element={<Checkout />} />
+              <Route path="/help" element={<Help />} />
+              <Route path="/shipping-info" element={<ShippingInfo />} />
+              <Route path="/return-policy" element={<ReturnPolicy />} />
+              <Route path="/track-order" element={<TrackOrder />} />
+              <Route path="/size-guide" element={<SizeGuide />} />
+              <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/about-us" element={<About />} />
+              <Route path="/contact-us" element={<Contact />} />
+              <Route path="/faqs" element={<FAQ />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/address-list" element={<AddressList />} />
+              <Route path="/supplier/login" element={<SupplierLogin />} />
+              <Route path="/supplier/register" element={<SupplierRegister />} />
+              <Route path="/admin/dashboard" element={<AdminPanel />} />
+            </Routes>
+            <Footer />
+          </div>
         </Layout>
       </div>
-      </ShopProvider>
     </Router>
   );
 }

@@ -877,4 +877,4 @@ const OrdersTable = ({ orders }) => (
   </div>
 );
 
-export default AdminPanel;
+export default AdminPanel; 

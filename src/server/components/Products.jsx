@@ -1,14 +1,7 @@
 export const Products = {
   async getAllProducts(filters = {}) {
     try {
-      const {
-        page = 1,
-        limit = 12,
-        category,
-        minPrice,
-        maxPrice,
-        sort = 'created_at'
-      } = filters;
+      const { page = 1 } = filters;
 
       // Mock query result
       const mockProducts = [];
@@ -24,7 +17,7 @@ export const Products = {
     }
   },
 
-  async getProductById(id) {
+  async getProductById() {
     try {
       // Mock product data
       const mockProduct = null;

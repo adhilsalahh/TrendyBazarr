@@ -32,7 +32,7 @@ export const Orders = {
     }
   },
 
-  async getOrdersByUser(userId) {
+  async getOrdersByUser() {
     try {
       // Mock query result
       const mockOrders = [];

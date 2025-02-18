@@ -1,6 +1,4 @@
-import jwt from 'jsonwebtoken';
-
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = 'your-secret-key';
 
 export const AuthMiddleware = {
   verifyToken(token) {
@@ -16,7 +14,7 @@ export const AuthMiddleware = {
     }
   },
 
-  async verifySupplier(userId) {
+  async verifySupplier() {
     try {
       // Mock supplier verification
       const mockVerificationStatus = false;

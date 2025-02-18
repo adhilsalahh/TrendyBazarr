@@ -1,8 +1,5 @@
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
-
 const SALT_ROUNDS = 10;
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
+const JWT_SECRET = 'your-secret-key';
 
 export const Auth = {
   async register(userData) {
