@@ -1,3 +1,5 @@
+import jwt from 'jsonwebtoken';
+
 const JWT_SECRET = 'your-secret-key';
 
 export const AuthMiddleware = {
