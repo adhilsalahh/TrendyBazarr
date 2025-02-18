@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Orders = {
   async createOrder(orderData) {
     try {
@@ -21,16 +19,14 @@ export const Orders = {
         payment_status: 'pending'
       };
 
-      // Add order items
-      if (items?.length) {
-        const orderItems = items.map(item => ({
-          product_id: item.product_id,
-          quantity: item.quantity,
-          price_at_time: item.price
-        }));
-      }
+      // Mock order items creation
+      const mockOrderItems = items?.map(item => ({
+        product_id: item.product_id,
+        quantity: item.quantity,
+        price_at_time: item.price
+      }));
 
-      return { order };
+      return { order, items: mockOrderItems };
     } catch (error) {
       throw new Error('Error creating order');
     }
@@ -38,12 +34,9 @@ export const Orders = {
 
   async getOrdersByUser(userId) {
     try {
-      const query = {
-        where: { user_id: userId },
-        include: ['items', 'items.product']
-      };
-
-      return { orders: [] }; // Replace with actual DB query
+      // Mock query result
+      const mockOrders = [];
+      return { orders: mockOrders };
     } catch (error) {
       throw new Error('Error fetching orders');
     }
@@ -66,5 +59,3 @@ export const Orders = {
     }
   }
 };
-
-export default Orders;

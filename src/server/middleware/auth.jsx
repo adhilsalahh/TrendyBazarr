@@ -1,5 +1,6 @@
-import React from 'react';
 import jwt from 'jsonwebtoken';
+
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export const AuthMiddleware = {
   verifyToken(token) {
@@ -8,7 +9,7 @@ export const AuthMiddleware = {
         throw new Error('No token provided');
       }
 
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(token, JWT_SECRET);
       return decoded;
     } catch (error) {
       throw new Error('Invalid token');
@@ -17,19 +18,11 @@ export const AuthMiddleware = {
 
   async verifySupplier(userId) {
     try {
-      // Check supplier status
-      const query = {
-        where: {
-          user_id: userId,
-          verification_status: 'verified'
-        }
-      };
-
-      return { isVerified: false }; // Replace with actual DB query
+      // Mock supplier verification
+      const mockVerificationStatus = false;
+      return { isVerified: mockVerificationStatus };
     } catch (error) {
       throw new Error('Error verifying supplier');
     }
   }
 };
-
-export default AuthMiddleware;

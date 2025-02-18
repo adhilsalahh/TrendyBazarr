@@ -1,5 +1,3 @@
-import React from 'react';
-
 export const Products = {
   async getAllProducts(filters = {}) {
     try {
@@ -12,43 +10,15 @@ export const Products = {
         sort = 'created_at'
       } = filters;
 
-      // Build query
-      let query = {
-        where: { is_active: true },
-        include: ['category', 'images', 'reviews'],
-        limit,
-        offset: (page - 1) * limit
+      // Mock query result
+      const mockProducts = [];
+      const mockPagination = {
+        currentPage: page,
+        totalPages: 1,
+        totalItems: 0
       };
 
-      // Add filters
-      if (category) {
-        query.where.category = category;
-      }
-
-      if (minPrice) {
-        query.where.price = { $gte: minPrice };
-      }
-
-      if (maxPrice) {
-        query.where.price = { ...query.where.price, $lte: maxPrice };
-      }
-
-      // Add sorting
-      switch (sort) {
-        case 'price-low':
-          query.order = [['price', 'ASC']];
-          break;
-        case 'price-high':
-          query.order = [['price', 'DESC']];
-          break;
-        case 'rating':
-          query.order = [['average_rating', 'DESC']];
-          break;
-        default:
-          query.order = [['created_at', 'DESC']];
-      }
-
-      return { products: [], pagination: {} }; // Replace with actual DB query
+      return { products: mockProducts, pagination: mockPagination };
     } catch (error) {
       throw new Error('Error fetching products');
     }
@@ -56,13 +26,9 @@ export const Products = {
 
   async getProductById(id) {
     try {
-      // Get product with relations
-      const query = {
-        where: { id, is_active: true },
-        include: ['category', 'supplier', 'images', 'reviews']
-      };
-
-      return { product: null }; // Replace with actual DB query
+      // Mock product data
+      const mockProduct = null;
+      return { product: mockProduct };
     } catch (error) {
       throw new Error('Error fetching product');
     }
@@ -92,19 +58,15 @@ export const Products = {
         quantity
       };
 
-      // Add images
-      if (images?.length) {
-        const productImages = images.map((url, index) => ({
-          url,
-          is_primary: index === 0
-        }));
-      }
+      // Mock image creation
+      const mockImages = images?.map((url, index) => ({
+        url,
+        is_primary: index === 0
+      }));
 
-      return { product };
+      return { product, images: mockImages };
     } catch (error) {
       throw new Error('Error creating product');
     }
   }
 };
-
-export default Products;

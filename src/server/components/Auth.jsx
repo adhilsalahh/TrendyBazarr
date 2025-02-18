@@ -1,8 +1,8 @@
-import React from 'react';
-import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
+import bcrypt from 'bcrypt';
 
 const SALT_ROUNDS = 10;
+const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 
 export const Auth = {
   async register(userData) {
@@ -24,7 +24,7 @@ export const Auth = {
       // Generate token
       const token = jwt.sign(
         { userId: user.id, role: 'customer' },
-        process.env.JWT_SECRET,
+        JWT_SECRET,
         { expiresIn: '24h' }
       );
 
@@ -37,25 +37,31 @@ export const Auth = {
   async login(credentials) {
     try {
       const { email, password } = credentials;
+      
+      // Mock user for example - replace with actual DB query
+      const mockUser = {
+        id: '1',
+        email,
+        password_hash: await bcrypt.hash(password, SALT_ROUNDS),
+        role: 'customer'
+      };
 
       // Validate credentials
-      const validPassword = await bcrypt.compare(password, user.password_hash);
+      const validPassword = await bcrypt.compare(password, mockUser.password_hash);
 
       if (!validPassword) {
         throw new Error('Invalid credentials');
       }
 
       const token = jwt.sign(
-        { userId: user.id, role: user.role },
-        process.env.JWT_SECRET,
+        { userId: mockUser.id, role: mockUser.role },
+        JWT_SECRET,
         { expiresIn: '24h' }
       );
 
-      return { token, user };
+      return { token, user: mockUser };
     } catch (error) {
       throw new Error('Error logging in');
     }
   }
 };
-
-export default Auth;
