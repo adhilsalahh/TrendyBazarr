@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Filter, SortAsc, ChevronLeft, ChevronRight, Star, Heart, ShoppingCart } from 'lucide-react';
+import { Filter, ChevronLeft, ChevronRight, Star, Heart, ShoppingCart } from 'lucide-react';
 import { useShop } from '../context/ShopContext';
 import { products } from '../utils/productData';
 
