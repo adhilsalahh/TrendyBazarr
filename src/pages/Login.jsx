@@ -1,14 +1,25 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { User } from 'lucide-react';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // Handle login logic
+    
+    // Admin credentials check
+    if (email === 'admin' && password === '1234admin') {
+      localStorage.setItem('isAdmin', 'true'); // Set admin flag
+      navigate('/admin/dashboard');
+      return;
+    }
+
+    // Regular user login logic would go here
+    setError('Invalid credentials');
   };
 
   return (
@@ -27,15 +38,20 @@ function Login() {
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+          {error && (
+            <div className="bg-red-50 dark:bg-red-900/50 text-red-500 dark:text-red-200 p-3 rounded-md text-sm">
+              {error}
+            </div>
+          )}
           <div className="space-y-4">
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Email address
+                Username/Email
               </label>
               <input
                 id="email"
                 name="email"
-                type="email"
+                type="text"
                 autoComplete="email"
                 required
                 value={email}
@@ -79,9 +95,6 @@ function Login() {
           <p className="text-sm text-gray-600 dark:text-gray-400">Are you a supplier?{' '}
             <Link to="/supplier/login" className="font-medium text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
               Login as Supplier
-            </Link>
-            <Link to="/admin/dashboard" className="font-medium p-10 text-indigo-600 hover:text-indigo-500 transition-colors duration-200">
-              Admin
             </Link>
           </p>
         </div>

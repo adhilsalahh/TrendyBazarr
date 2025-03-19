@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard,
   Package,
@@ -26,7 +27,9 @@ import {
   User,
   Moon,
   Sun,
-  HelpCircle
+  Globe,
+  X,
+  Eye
 } from 'lucide-react';
 import {
   LineChart,
@@ -168,16 +171,267 @@ const orders = [
 ];
 
 function AdminPanel() {
+  const navigate = useNavigate();
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const [activeMenu, setActiveMenu] = useState('dashboard');
   const [expandedMenu, setExpandedMenu] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isDarkMode, setIsDarkMode] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+  const [newProduct, setNewProduct] = useState({
+    name: '',
+    description: '',
+    category: '',
+    sku: '',
+    price: '',
+    quantity: '',
+    images: []
+  });
+  const [previewImages, setPreviewImages] = useState([]);
+
+  useEffect(() => {
+    // Check if user is logged in as admin
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
+    if (!isAdmin) {
+      navigate('/login');
+    }
+  }, [navigate]);
+
+  const handleLogout = () => {
+    localStorage.removeItem('isAdmin');
+    navigate('/login');
+  };
+
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const imageUrls = files.map(file => URL.createObjectURL(file));
+    setPreviewImages(prev => [...prev, ...imageUrls]);
+  };
+
+  const removeImage = (index) => {
+    setPreviewImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleProductSubmit = (e) => {
+    e.preventDefault();
+    const product = {
+      id: Date.now().toString(),
+      ...newProduct,
+      status: 'active',
+      image: previewImages[0] || 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&q=80&w=100'
+    };
+    setProducts(prev => [...prev, product]);
+    setNewProduct({
+      name: '',
+      description: '',
+      category: '',
+      sku: '',
+      price: '',
+      quantity: '',
+      images: []
+    });
+    setPreviewImages([]);
+    setShowAddProduct(false);
+  };
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
     document.documentElement.classList.toggle('dark');
+  };
+
+  // Components
+  const Header = () => (
+    <header className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-10">
+      <div className="max-w-full mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          <div className="flex items-center">
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
+            >
+              {sidebarOpen ? <ChevronLeft className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
+            </button>
+            <div className="ml-4 flex items-center">
+              <Store className="h-8 w-8 text-indigo-600" />
+              <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
+                Admin Panel
+              </span>
+            </div>
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+            >
+              {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+            </button>
+
+            <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
+              <Globe className="h-5 w-5" />
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowNotifications(!showNotifications)}
+                className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                <Bell className="h-5 w-5" />
+              </button>
+              {showNotifications && (
+                <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                  <div className="p-4">
+                    <h3 className="text-lg font-semibold">Notifications</h3>
+                    {/* Add notification items here */}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+              >
+                <User className="h-5 w-5" />
+                <span>Admin</span>
+              </button>
+              {showUserMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+                  <div className="py-1">
+                    <button
+                      onClick={handleLogout}
+                      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+  );
+
+  const Sidebar = () => (
+    <aside
+      className={`fixed inset-y-0 left-0 bg-white dark:bg-gray-800 w-64 transform transition-transform 
+                 duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
+                 shadow-lg z-20 mt-16`}
+    >
+      <nav className="mt-5 px-2">
+        <div className="space-y-1">
+          {menuItems.map((item) => (
+            <div key={item.id}>
+              <button
+                onClick={() => {
+                  setActiveMenu(item.id);
+                  if (item.subItems) {
+                    setExpandedMenu(expandedMenu === item.id ? null : item.id);
+                  }
+                }}
+                className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md 
+                         transition-colors duration-200 ${
+                           activeMenu === item.id
+                             ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200'
+                             : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                         }`}
+              >
+                {item.icon}
+                <span className="ml-3">{item.label}</span>
+                {item.subItems && (
+                  <ChevronDown
+                    className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${
+                      expandedMenu === item.id ? 'rotate-180' : ''
+                    }`}
+                  />
+                )}
+              </button>
+              {item.subItems && expandedMenu === item.id && (
+                <div className="mt-1 space-y-1">
+                  {item.subItems.map((subItem) => (
+                    <button
+                      key={subItem.id}
+                      onClick={() => setActiveMenu(subItem.id)}
+                      className={`w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium 
+                               rounded-md transition-colors duration-200 ${
+                                 activeMenu === subItem.id
+                                   ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200'
+                                   : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                               }`}
+                    >
+                      {subItem.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </nav>
+    </aside>
+  );
+
+  const StatCard = ({ title, value, icon, trend, alert, iconBg }) => (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
+          <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</h3>
+        </div>
+        <div className={`p-3 ${iconBg} rounded-full`}>
+          {icon}
+        </div>
+      </div>
+      <div className="mt-4 flex items-center text-sm">
+        {trend && (
+          <>
+            <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
+            <span className="text-green-500">{trend.value}</span>
+            <span className="text-gray-600 dark:text-gray-400 ml-2">{trend.text}</span>
+          </>
+        )}
+        {alert && (
+          <>
+            {alert.icon}
+            <span className="text-gray-600 dark:text-gray-400 ml-2">{alert.text}</span>
+          </>
+        )}
+      </div>
+    </div>
+  );
+
+  const ChartCard = ({ title, children }) => (
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+      <h3 className="text-lg font-semibold mb-4">{title}</h3>
+      {children}
+    </div>
+  );
+
+  const StatusBadge = ({ status }) => {
+    const getStatusColor = (status) => {
+      switch (status) {
+        case 'pending':
+          return 'bg-yellow-100 text-yellow-800';
+        case 'shipped':
+          return 'bg-blue-100 text-blue-800';
+        case 'delivered':
+          return 'bg-green-100 text-green-800';
+        case 'cancelled':
+          return 'bg-red-100 text-red-800';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    };
+
+    return (
+      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(status)}`}>
+        {status}
+      </span>
+    );
   };
 
   const renderDashboardStats = () => (
@@ -328,287 +582,59 @@ function AdminPanel() {
 
   return (
     <div className={`min-h-screen bg-gray-50 dark:bg-gray-900 ${isDarkMode ? 'dark' : ''}`}>
-      <Header
-        sidebarOpen={sidebarOpen}
-        setSidebarOpen={setSidebarOpen}
-        isDarkMode={isDarkMode}
-        toggleDarkMode={toggleDarkMode}
-        showNotifications={showNotifications}
-        setShowNotifications={setShowNotifications}
-        showUserMenu={showUserMenu}
-        setShowUserMenu={setShowUserMenu}
-      />
-
-      <Sidebar
-        sidebarOpen={sidebarOpen}
-        menuItems={menuItems}
-        activeMenu={activeMenu}
-        setActiveMenu={setActiveMenu}
-        expandedMenu={expandedMenu}
-        setExpandedMenu={setExpandedMenu}
-      />
+      <Header />
+      <Sidebar />
 
       <main className={`transition-all duration-300 ${sidebarOpen ? 'ml-64' : 'ml-0'} pt-16 min-h-screen`}>
         <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {renderContent()}
         </div>
       </main>
-    </div>
-  );
-}
 
-// Components
-const Header = ({
-  sidebarOpen,
-  setSidebarOpen,
-  isDarkMode,
-  toggleDarkMode,
-  showNotifications,
-  setShowNotifications,
-  showUserMenu,
-  setShowUserMenu
-}) => (
-  <header className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-10">
-    <div className="max-w-full mx-auto px-4">
-      <div className="flex items-center justify-between h-16">
-        <div className="flex items-center">
-          <button
-            onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="text-gray-500 hover:text-gray-600 dark:text-gray-400 dark:hover:text-gray-300"
-          >
-            {sidebarOpen ? <ChevronLeft className="h-6 w-6" /> : <ChevronRight className="h-6 w-6" />}
-          </button>
-          <div className="ml-4 flex items-center">
-            <Store className="h-8 w-8 text-indigo-600" />
-            <span className="ml-2 text-xl font-semibold text-gray-900 dark:text-white">
-              Admin Panel
-            </span>
-          </div>
-        </div>
+      {/* Add Product Modal */}
+      {showAddProduct && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Add New Product</h2>
+                <button
+                  onClick={() => setShowAddProduct(false)}
+                  className="text-gray-400 hover:text-gray-500 dark:hover:text-gray-300"
+                >
+                  <X className="h-6 w-6" />
+                </button>
+              </div>
 
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={toggleDarkMode}
-            className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-          >
-            {isDarkMode ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-          </button>
-
-          <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <HelpCircle className="h-5 w-5" />
-          </button>
-
-          <NotificationsMenu
-            showNotifications={showNotifications}
-            setShowNotifications={setShowNotifications}
-          />
-
-          <UserMenu
-            showUserMenu={showUserMenu}
-            setShowUserMenu={setShowUserMenu}
-          />
-        </div>
-      </div>
-    </div>
-  </header>
-);
-
-const Sidebar = ({
-  sidebarOpen,
-  menuItems,
-  activeMenu,
-  setActiveMenu,
-  expandedMenu,
-  setExpandedMenu
-}) => (
-  <aside
-    className={`fixed inset-y-0 left-0 bg-white dark:bg-gray-800 w-64 transform transition-transform 
-               duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} 
-               shadow-lg z-20 mt-16`}
-  >
-    <nav className="mt-5 px-2">
-      <div className="space-y-1">
-        {menuItems.map((item) => (
-          <div key={item.id}>
-            <button
-              onClick={() => {
-                setActiveMenu(item.id);
-                if (item.subItems) {
-                  setExpandedMenu(expandedMenu === item.id ? null : item.id);
-                }
-              }}
-              className={`w-full flex items-center px-2 py-2 text-sm font-medium rounded-md 
-                       transition-colors duration-200 ${
-                         activeMenu === item.id
-                           ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200'
-                           : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                       }`}
-            >
-              {item.icon}
-              <span className="ml-3">{item.label}</span>
-              {item.subItems && (
-                <ChevronDown
-                  className={`ml-auto h-4 w-4 transform transition-transform duration-200 ${
-                    expandedMenu === item.id ? 'rotate-180' : ''
-                  }`}
-                />
-              )}
-            </button>
-            {item.subItems && expandedMenu === item.id && (
-              <div className="mt-1 space-y-1">
-                {item.subItems.map((subItem) => (
+              <form onSubmit={handleProductSubmit} className="space-y-6">
+                {/* Product form fields */}
+                <div className="flex justify-end space-x-3">
                   <button
-                    key={subItem.id}
-                    onClick={() => setActiveMenu(subItem.id)}
-                    className={`w-full flex items-center pl-11 pr-2 py-2 text-sm font-medium 
-                             rounded-md transition-colors duration-200 ${
-                               activeMenu === subItem.id
-                                 ? 'bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-200'
-                                 : 'text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
-                             }`}
+                    type="button"
+                    onClick={() => setShowAddProduct(false)}
+                    className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium 
+                             text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 
+                             focus:ring-offset-2 focus:ring-indigo-500"
                   >
-                    {subItem.label}
+                    Cancel
                   </button>
-                ))}
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
-    </nav>
-  </aside>
-);
-
-const StatCard = ({ title, value, icon, trend, alert, iconBg }) => (
-  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
-        <h3 className="text-2xl font-bold text-gray-900 dark:text-white mt-1">{value}</h3>
-      </div>
-      <div className={`p-3 ${iconBg} rounded-full`}>
-        {icon}
-      </div>
-    </div>
-    <div className="mt-4 flex items-center text-sm">
-      {trend && (
-        <>
-          <TrendingUp className="h-4 w-4 text-green-500 mr-1" />
-          <span className="text-green-500">{trend.value}</span>
-          <span className="text-gray-600 dark:text-gray-400 ml-2">{trend.text}</span>
-        </>
-      )}
-      {alert && (
-        <>
-          {alert.icon}
-          <span className="text-gray-600 dark:text-gray-400 ml-2">{alert.text}</span>
-        </>
-      )}
-    </div>
-  </div>
-);
-
-const ChartCard = ({ title, children }) => (
-  <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
-    <h3 className="text-lg font-semibold mb-4">{title}</h3>
-    {children}
-  </div>
-);
-
-const StatusBadge = ({ status }) => {
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'shipped':
-        return 'bg-blue-100 text-blue-800';
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'cancelled':
-        return 'bg-red-100 text-red-800';
-      default:
-        return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  return (
-    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(status)}`}>
-      {status}
-    </span>
-  );
-};
-
-const NotificationsMenu = ({ showNotifications, setShowNotifications }) => (
-  <div className="relative">
-    <button
-      onClick={() => setShowNotifications(!showNotifications)}
-      className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 relative"
-    >
-      <Bell className="h-5 w-5" />
-      <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-500 transform translate-x-1/2 -translate-y-1/2"></span>
-    </button>
-
-    {showNotifications && (
-      <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-        <div className="p-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Notifications</h3>
-          <div className="mt-4 space-y-4">
-            <div className="flex items-start space-x-3">
-              <div className="flex-shrink-0">
-                <div className="h-8 w-8 rounded-full bg-green-100 flex items-center justify-center">
-                  <ShoppingCart className="h-4 w-4 text-green-600" />
+                  <button
+                    type="submit"
+                    className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm 
+                             font-medium text-white bg-indigo-600 hover:bg-indigo-700 
+                             focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Add Product
+                  </button>
                 </div>
-              </div>
-              <div>
-                <p className="text-sm text-gray-900 dark:text-white">New order received</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">5 minutes ago</p>
-              </div>
+              </form>
             </div>
           </div>
         </div>
-      </div>
-    )}
-  </div>
-);
-
-const UserMenu = ({ showUserMenu, setShowUserMenu }) => (
-  <div className="relative">
-    <button
-      onClick={() => setShowUserMenu(!showUserMenu)}
-      className="flex items-center space-x-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-    >
-      <div className="h-8 w-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-        <User className="h-5 w-5" />
-      </div>
-      <ChevronDown className="h-4 w-4" />
-    </button>
-
-    {showUserMenu && (
-      <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5">
-        <div className="py-1">
-          <a
-            href="#profile"
-            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            Profile
-          </a>
-          <a
-            href="#settings"
-            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            Settings
-          </a>
-          <a
-            href="#logout"
-            className="block px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700"
-          >
-            Logout
-          </a>
-        </div>
-      </div>
-    )}
-  </div>
-);
+      )}
+    </div>
+  );
+}
 
 const ProductsTable = ({ products }) => (
   <div className="space-y-6">
@@ -621,30 +647,6 @@ const ProductsTable = ({ products }) => (
     </div>
 
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search products..."
-              className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-          <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Filter className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="flex items-center space-x-2">
-          <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Download className="h-5 w-5" />
-          </button>
-          <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Upload className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
@@ -696,6 +698,91 @@ const ProductsTable = ({ products }) => (
                     <Trash2 className="h-5 w-5" />
                   </button>
                   <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
+                    <Eye className="h-5 w-5" />
+                  </button>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+);
+
+const UsersTable = ({ users }) => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-2xl font-bold">Users</h2>
+      <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center">
+        <Plus className="w-5 h-5 mr-2" />
+        Add User
+      </button>
+    </div>
+
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+        <thead className="bg-gray-50 dark:bg-gray-700">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              User
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Role
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Status
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Join Date
+            </th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+              Actions
+            </th>
+          </tr>
+        </thead>
+        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center">
+                  <div className="flex-shrink-0 h-10 w-10">
+                    <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
+                      <User className="h-6 w-6 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="ml-4">
+                    <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</div>
+                    <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
+                  </div>
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                  user.role === 'admin'
+                    ? 'bg-purple-100 text-purple-800'
+                    : user.role === 'supplier'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {user.role}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <StatusBadge status={user.status} />
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                {user.joinDate}
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <div className="flex space-x-2">
+                  <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
+                    <Edit className="h-5 w-5" />
+                  </button>
+                  <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                    <Trash2 className="h-5 w-5" />
+                  </button>
+                  <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
                     <MoreVertical className="h-5 w-5" />
                   </button>
                 </div>
@@ -708,96 +795,6 @@ const ProductsTable = ({ products }) => (
   </div>
 );
 
-const UsersTable = ({ users }) => {
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Users</h2>
-        <button className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center">
-          <Plus className="w-5 h-5 mr-2" />
-          Add User
-        </button>
-      </div>
-
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-        <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-          <div className="flex items-center space-x-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search users..."
-                className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-              />
-              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-            </div>
-          </div>
-        </div>
-
-        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-          <thead className="bg-gray-50 dark:bg-gray-700">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">User</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Role</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Join Date</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-            {users.map((user) => (
-              <tr key={user.id}>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10">
-                      <div className="h-10 w-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
-                        <User className="h-6 w-6 text-gray-400" />
-                      </div>
-                    </div>
-                    <div className="ml-4">
-                      <div className="text-sm font-medium text-gray-900 dark:text-white">{user.name}</div>
-                      <div className="text-sm text-gray-500 dark:text-gray-400">{user.email}</div>
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    user.role === 'admin'
-                      ? 'bg-purple-100 text-purple-800'
-                      : user.role === 'supplier'
-                      ? 'bg-blue-100 text-blue-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {user.role}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge status={user.status} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                  {user.joinDate}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                  <div className="flex space-x-2">
-                    <button className="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                      <Edit className="h-5 w-5" />
-                    </button>
-                    <button className="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                    <button className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-300">
-                      <MoreVertical className="h-5 w-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-};
-
 const OrdersTable = ({ orders }) => (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
@@ -805,22 +802,6 @@ const OrdersTable = ({ orders }) => (
     </div>
 
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
-      <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <div className="flex items-center space-x-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search orders..."
-              className="pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
-            />
-            <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
-          </div>
-          <button className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400">
-            <Filter className="h-5 w-5" />
-          </button>
-        </div>
-      </div>
-
       <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
         <thead className="bg-gray-50 dark:bg-gray-700">
           <tr>
@@ -877,4 +858,4 @@ const OrdersTable = ({ orders }) => (
   </div>
 );
 
-export default AdminPanel; 
+export default AdminPanel;
