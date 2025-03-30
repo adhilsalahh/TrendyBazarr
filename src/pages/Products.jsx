@@ -1,41 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ShoppingCart, Heart } from 'lucide-react';
-import { products } from '../utils/productData';
-
-// Sample data - replace with actual data from your backend
-const categories = [
-  {
-    id: '1',
-    name: 'Electronics',
-    image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?auto=format&fit=crop&q=80&w=600',
-    count: 120
-  },
-  {
-    id: '2',
-    name: 'Fashion',
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&q=80&w=600',
-    count: 350
-  },
-  {
-    id: '3',
-    name: 'Home & Living',
-    image: 'https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&q=80&w=600',
-    count: 200
-  },
-  {
-    id: '4',
-    name: 'Gadgets',
-    image: 'https://images.unsplash.com/photo-1519558260268-cde7e03a0152?auto=format&fit=crop&q=80&w=600',
-    count: 180
-  }
-];
+import { ShoppingCart, Heart, Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
+import { useShop } from '../context/ShopContext';
+import { productUtils, categoryUtils } from '../server/utils/database';
 
 function Products() {
+  const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
   const [wishlist, setWishlist] = useState([]);
   const [cart, setCart] = useState([]);
+  const [filters, setFilters] = useState({
+    category: '',
+    priceRange: { min: '', max: '' },
+    sortBy: 'newest'
+  });
+  const [showFilters, setShowFilters] = useState(false);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [productsData, categoriesData] = await Promise.all([
+        productUtils.getAllProducts(),
+        categoryUtils.getAllCategories()
+      ]);
+      setProducts(productsData);
+      setCategories(categoriesData);
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const showToast = (message) => {
     setNotificationMessage(message);
@@ -58,59 +60,163 @@ function Products() {
     }
   };
 
+  // Filter and sort products
+  const filteredProducts = products.filter(product => {
+    const matchesCategory = !filters.category || product.category_id === filters.category;
+    const matchesPriceRange = (!filters.priceRange.min || product.price >= filters.priceRange.min) &&
+                             (!filters.priceRange.max || product.price <= filters.priceRange.max);
+    return matchesCategory && matchesPriceRange;
+  });
+
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (filters.sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'name-asc':
+        return a.name.localeCompare(b.name);
+      case 'name-desc':
+        return b.name.localeCompare(a.name);
+      default: // newest
+        return new Date(b.created_at) - new Date(a.created_at);
+    }
+  });
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Categories Section */}
-      <section className="mb-12">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Shop by Category</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {categories.map((category) => (
-            <Link
-              key={category.id}
-              to={`/category/${category.name.toLowerCase()}`}
-              className="group relative overflow-hidden rounded-lg shadow-md hover:shadow-xl 
-                       transition-transform duration-300 hover:-translate-y-1"
+      {/* Search and Filters */}
+      <div className="mb-8">
+        <div className="flex flex-wrap gap-4 items-center justify-between">
+          <div className="flex-1 min-w-[200px] max-w-xl">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                         focus:ring-indigo-500 focus:border-transparent"
+              />
+              <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setShowFilters(!showFilters)}
+              className="flex items-center px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              <div className="aspect-w-16 aspect-h-9">
-                <img
-                  src={category.image}
-                  alt={category.name}
-                  className="object-cover w-full h-full transform transition-transform duration-300 
-                           group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
-              </div>
-              <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
-                <h3 className="text-xl font-semibold mb-1">{category.name}</h3>
-                <p className="text-sm opacity-90">{category.count}+ items</p>
-              </div>
-            </Link>
-          ))}
+              <Filter className="h-5 w-5 mr-2" />
+              Filters
+              {showFilters ? (
+                <ChevronUp className="h-4 w-4 ml-2" />
+              ) : (
+                <ChevronDown className="h-4 w-4 ml-2" />
+              )}
+            </button>
+            <select
+              value={filters.sortBy}
+              onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500"
+            >
+              <option value="newest">Newest First</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="name-asc">Name (A-Z)</option>
+              <option value="name-desc">Name (Z-A)</option>
+            </select>
+          </div>
         </div>
-      </section>
 
-      {/* Products Grid */}
-      <section>
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Featured Products</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {Object.values(products).map((product) => (
-            <div
-              key={product.id}
-              className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden"
-            >
-              <Link to={`/product/${product.id}`} className="block">
-                <div className="relative">
-                  <img
-                    src={product.images[0]}
-                    alt={product.name}
-                    className="w-full h-48 object-cover transition-transform duration-300 hover:scale-105"
+        {/* Filter Panel */}
+        {showFilters && (
+          <div className="mt-4 p-4 bg-white dark:bg-gray-800 rounded-lg shadow-md">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Category
+                </label>
+                <select
+                  value={filters.category}
+                  onChange={(e) => setFilters({ ...filters, category: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                         focus:ring-indigo-500"
+                >
+                  <option value="">All Categories</option>
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>{category.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                  Price Range
+                </label>
+                <div className="flex items-center space-x-2">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={filters.priceRange.min}
+                    onChange={(e) => setFilters({
+                      ...filters,
+                      priceRange: { ...filters.priceRange, min: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                           focus:ring-indigo-500"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={filters.priceRange.max}
+                    onChange={(e) => setFilters({
+                      ...filters,
+                      priceRange: { ...filters.priceRange, max: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 
+                           focus:ring-indigo-500"
                   />
                 </div>
-              </Link>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {sortedProducts.map((product) => (
+          <div
+            key={product.id}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden group 
+                     hover:-translate-y-1 transition-all duration-300"
+          >
+            <Link to={`/product/${product.id}`} className="block relative">
+              <img
+                src={product.images?.[0] || 'https://via.placeholder.com/300'}
+                alt={product.name}
+                className="w-full aspect-square object-cover transform transition-transform 
+                         duration-500 group-hover:scale-110"
+              />
+              {product.discount > 0 && (
+                <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full 
+                             text-xs">
+                  -{product.discount}%
+                </div>
+              )}
               <button
-                onClick={() => toggleWishlist(product)}
-                className="absolute top-4 right-4 p-2 rounded-full bg-white dark:bg-gray-800 
-                         shadow-md hover:scale-110 transition-transform duration-200"
+                onClick={(e) => {
+                  e.preventDefault();
+                  toggleWishlist(product);
+                }}
+                className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white 
+                         transition-colors duration-200"
               >
                 <Heart
                   className={`w-5 h-5 ${
@@ -120,31 +226,40 @@ function Products() {
                   }`}
                 />
               </button>
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+            </Link>
+            <div className="p-4">
+              <Link to={`/product/${product.id}`}>
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-1 
+                           hover:text-indigo-600">
                   {product.name}
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 text-sm mb-4">
-                  {product.description}
-                </p>
-                <div className="flex items-center justify-between">
+              </Link>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
+                {product.categories?.name}
+              </p>
+              <div className="flex items-center justify-between">
+                <div>
                   <span className="text-xl font-bold text-gray-900 dark:text-white">
                     ${product.price}
                   </span>
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="flex items-center space-x-2 bg-indigo-600 text-white px-4 py-2 rounded-lg 
-                             hover:bg-indigo-700 transition-colors duration-200"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                    <span>Add to Cart</span>
-                  </button>
+                  {product.compare_price && (
+                    <span className="ml-2 text-sm text-gray-500 line-through">
+                      ${product.compare_price}
+                    </span>
+                  )}
                 </div>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 
+                         transition-colors duration-200"
+                >
+                  <ShoppingCart className="w-5 h-5" />
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      </section>
+          </div>
+        ))}
+      </div>
 
       {/* Toast Notification */}
       <div
@@ -159,7 +274,7 @@ function Products() {
             to="/cart"
             className="ml-4 text-indigo-400 hover:text-indigo-300 font-medium"
           >
-            Go to Cart
+            View Cart
           </Link>
         )}
       </div>
