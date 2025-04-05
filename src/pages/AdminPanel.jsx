@@ -12,9 +12,9 @@ import {
   Plus,
   Edit,
   Trash2,
-  MoreVertical,
+
   Filter,
-  Download,
+ 
   Upload,
   Store,
   TrendingUp,
