@@ -1,8 +1,8 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 
-export const ShopContext = createContext();
+const ShopContext = createContext();
 
-export function ShopProvider({ children }) {
+function ShopProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -49,22 +49,21 @@ export function ShopProvider({ children }) {
     });
   };
 
+  const value = {
+    cart,
+    wishlist,
+    addToCart,
+    removeFromCart,
+    updateQuantity,
+    toggleWishlist,
+    cartCount,
+  };
+
   return (
-    <ShopContext.Provider
-      value={{
-        cart,
-        wishlist,
-        addToCart,
-        removeFromCart,
-        updateQuantity,
-        toggleWishlist,
-        cartCount,
-      }}
-    >
+    <ShopContext.Provider value={value}>
       {children}
     </ShopContext.Provider>
   );
 }
 
-// Custom Hook
-export const useShop = () => useContext(ShopContext);
+export { ShopContext, ShopProvider };
