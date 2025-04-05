@@ -12,9 +12,7 @@ import {
   Plus,
   Edit,
   Trash2,
-
   Filter,
- 
   Upload,
   Store,
   TrendingUp,
@@ -167,8 +165,13 @@ function AdminPanel() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
+  const [newCategory, setNewCategory] = useState({
+    name: '',
+    slug: '',
+    description: '',
+    parentCategory: ''
+  });
   const [newProduct, setNewProduct] = useState({
     name: '',
     description: '',
@@ -176,13 +179,8 @@ function AdminPanel() {
     sku: '',
     price: '',
     quantity: '',
+    status: 'active',
     images: []
-  });
-  const [newCategory, setNewCategory] = useState({
-    name: '',
-    slug: '',
-    description: '',
-    parentCategory: ''
   });
   const [previewImages, setPreviewImages] = useState([]);
   const [notifications] = useState([
@@ -218,21 +216,50 @@ function AdminPanel() {
     const files = Array.from(e.target.files);
     const imageUrls = files.map(file => URL.createObjectURL(file));
     setPreviewImages(prev => [...prev, ...imageUrls]);
+    setNewProduct(prev => ({
+      ...prev,
+      images: [...prev.images, ...files]
+    }));
   };
 
   const removeImage = (index) => {
     setPreviewImages(prev => prev.filter((_, i) => i !== index));
+    setNewProduct(prev => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index)
+    }));
   };
 
   const handleProductSubmit = (e) => {
     e.preventDefault();
-    // Handle product submission
-    setShowAddProduct(false);
+    // Here you would typically send the data to your backend
+    console.log('New product:', newProduct);
+    // Reset form
+    setNewProduct({
+      name: '',
+      description: '',
+      category: '',
+      sku: '',
+      price: '',
+      quantity: '',
+      status: 'active',
+      images: []
+    });
+    setPreviewImages([]);
+    setActiveMenu('all-products');
   };
 
   const handleCategorySubmit = (e) => {
     e.preventDefault();
-    // Handle category submission
+    // Here you would typically send the data to your backend
+    console.log('New category:', newCategory);
+    // Reset form
+    setNewCategory({
+      name: '',
+      slug: '',
+      description: '',
+      parentCategory: ''
+    });
     setShowAddCategory(false);
   };
 
@@ -561,6 +588,8 @@ function AdminPanel() {
                   </label>
                   <input
                     type="text"
+                    value={newProduct.name}
+                    onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
@@ -573,6 +602,8 @@ function AdminPanel() {
                   </label>
                   <input
                     type="text"
+                    value={newProduct.sku}
+                    onChange={(e) => setNewProduct({...newProduct, sku: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   />
@@ -583,6 +614,8 @@ function AdminPanel() {
                     Category
                   </label>
                   <select
+                    value={newProduct.category}
+                    onChange={(e) => setNewProduct({...newProduct, category: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
@@ -605,6 +638,8 @@ function AdminPanel() {
                     <input
                       type="number"
                       step="0.01"
+                      value={newProduct.price}
+                      onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
                       className="block w-full pl-7 border border-gray-300 rounded-md shadow-sm py-2 px-3 
                              focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                       required
@@ -618,6 +653,8 @@ function AdminPanel() {
                   </label>
                   <input
                     type="number"
+                    value={newProduct.quantity}
+                    onChange={(e) => setNewProduct({...newProduct, quantity: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
@@ -629,6 +666,8 @@ function AdminPanel() {
                     Status
                   </label>
                   <select
+                    value={newProduct.status}
+                    onChange={(e) => setNewProduct({...newProduct, status: e.target.value})}
                     className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                            focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                     required
@@ -646,6 +685,8 @@ function AdminPanel() {
                 </label>
                 <textarea
                   rows={4}
+                  value={newProduct.description}
+                  onChange={(e) => setNewProduct({...newProduct, description: e.target.value})}
                   className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 
                          focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
                   required
@@ -708,7 +749,7 @@ function AdminPanel() {
               <div className="flex justify-end space-x-3">
                 <button
                   type="button"
-                  onClick={() => setShowAddProduct(false)}
+                  onClick={() => setActiveMenu('all-products')}
                   className="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium 
                          text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 
                          focus:ring-offset-2 focus:ring-indigo-500"
