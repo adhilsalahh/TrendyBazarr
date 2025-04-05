@@ -1,43 +1,23 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Heart, Search, Filter, ChevronDown, ChevronUp } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
-import { productUtils, categoryUtils } from '../server/utils/database';
+import { useShop } from '../context/useShop';
+import { products } from '../utils/productData';
 
 function Products() {
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const { addToCart, toggleWishlist, wishlist } = useShop();
   const [showNotification, setShowNotification] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState('');
-  const [wishlist, setWishlist] = useState([]);
-  const [cart, setCart] = useState([]);
+  const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState({
     category: '',
     priceRange: { min: '', max: '' },
     sortBy: 'newest'
   });
-  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    window.scrollTo(0, 0);
   }, []);
-
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const [productsData, categoriesData] = await Promise.all([
-        productUtils.getAllProducts(),
-        categoryUtils.getAllCategories()
-      ]);
-      setProducts(productsData);
-      setCategories(categoriesData);
-    } catch (error) {
-      console.error('Error fetching data:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const showToast = (message) => {
     setNotificationMessage(message);
@@ -45,24 +25,9 @@ function Products() {
     setTimeout(() => setShowNotification(false), 3000);
   };
 
-  const addToCart = (product) => {
-    setCart([...cart, product.id]);
-    showToast('Item Added to Cart');
-  };
-
-  const toggleWishlist = (product) => {
-    if (wishlist.includes(product.id)) {
-      setWishlist(wishlist.filter(id => id !== product.id));
-      showToast('Item Removed from Wishlist');
-    } else {
-      setWishlist([...wishlist, product.id]);
-      showToast('Item Added to Wishlist');
-    }
-  };
-
   // Filter and sort products
-  const filteredProducts = products.filter(product => {
-    const matchesCategory = !filters.category || product.category_id === filters.category;
+  const filteredProducts = Object.values(products).filter(product => {
+    const matchesCategory = !filters.category || product.category.toLowerCase() === filters.category.toLowerCase();
     const matchesPriceRange = (!filters.priceRange.min || product.price >= filters.priceRange.min) &&
                              (!filters.priceRange.max || product.price <= filters.priceRange.max);
     return matchesCategory && matchesPriceRange;
@@ -79,17 +44,11 @@ function Products() {
       case 'name-desc':
         return b.name.localeCompare(a.name);
       default: // newest
-        return new Date(b.created_at) - new Date(a.created_at);
+        return 0;
     }
   });
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-600"></div>
-      </div>
-    );
-  }
+  const categories = [...new Set(Object.values(products).map(product => product.category))];
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -101,8 +60,8 @@ function Products() {
               <input
                 type="text"
                 placeholder="Search products..."
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 
-                         focus:ring-indigo-500 focus:border-transparent"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg 
+                       focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               />
               <Search className="absolute left-3 top-2.5 h-5 w-5 text-gray-400" />
             </div>
@@ -150,7 +109,7 @@ function Products() {
                 >
                   <option value="">All Categories</option>
                   {categories.map((category) => (
-                    <option key={category.id} value={category.id}>{category.name}</option>
+                    <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
               </div>
@@ -199,28 +158,23 @@ function Products() {
           >
             <Link to={`/product/${product.id}`} className="block relative">
               <img
-                src={product.images?.[0] || 'https://via.placeholder.com/300'}
+                src={product.images[0]}
                 alt={product.name}
                 className="w-full aspect-square object-cover transform transition-transform 
                          duration-500 group-hover:scale-110"
               />
-              {product.discount > 0 && (
-                <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded-full 
-                             text-xs">
-                  -{product.discount}%
-                </div>
-              )}
               <button
                 onClick={(e) => {
                   e.preventDefault();
                   toggleWishlist(product);
+                  showToast(`${product.name} ${wishlist.includes(product) ? 'removed from' : 'added to'} wishlist`);
                 }}
                 className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white 
                          transition-colors duration-200"
               >
                 <Heart
                   className={`w-5 h-5 ${
-                    wishlist.includes(product.id)
+                    wishlist.includes(product)
                       ? 'text-red-500 fill-current'
                       : 'text-gray-400'
                   }`}
@@ -235,21 +189,19 @@ function Products() {
                 </h3>
               </Link>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">
-                {product.categories?.name}
+                {product.category}
               </p>
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xl font-bold text-gray-900 dark:text-white">
                     ${product.price}
                   </span>
-                  {product.compare_price && (
-                    <span className="ml-2 text-sm text-gray-500 line-through">
-                      ${product.compare_price}
-                    </span>
-                  )}
                 </div>
                 <button
-                  onClick={() => addToCart(product)}
+                  onClick={() => {
+                    addToCart(product);
+                    showToast(`${product.name} added to cart`);
+                  }}
                   className="p-2 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 
                          transition-colors duration-200"
                 >
@@ -269,14 +221,6 @@ function Products() {
                    }`}
       >
         {notificationMessage}
-        {notificationMessage.includes('Cart') && (
-          <Link
-            to="/cart"
-            className="ml-4 text-indigo-400 hover:text-indigo-300 font-medium"
-          >
-            View Cart
-          </Link>
-        )}
       </div>
     </div>
   );
