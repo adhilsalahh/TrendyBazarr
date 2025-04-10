@@ -2,6 +2,8 @@ import React, {useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag, Trash2 } from 'lucide-react';
 // import { useShop } from '../context/ShopContext';
+// Add this
+import { useShop } from '@/context/ShopContext'
 
 export default function Cart() {
   const { cart, removeFromCart, updateQuantity } = useShop();
