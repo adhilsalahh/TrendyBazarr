@@ -165,6 +165,8 @@ function AdminPanel() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAddProduct, setShowAddProduct] = useState(false);
+
   // const [showAddProduct, setShowAddProduct] = useState(false);
   const [showAddCategory, setShowAddCategory] = useState(false);
   // const [newProduct, setNewProduct] = useState({
