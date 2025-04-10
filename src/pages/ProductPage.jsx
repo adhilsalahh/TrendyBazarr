@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Star, Heart, Share2, Truck, Package, Shield } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
+import { useShop } from '../context/useShop';
 import { products } from '../utils/productData';
 
 function ProductPage() {
   const { id } = useParams();
+  const navigate = useNavigate();
   const product = products[id];
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -16,7 +17,7 @@ function ProductPage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, [id]); // Scroll to top when product ID changes
+  }, [id]);
 
   if (!product) {
     return (
@@ -31,14 +32,17 @@ function ProductPage() {
     );
   }
 
-  // Get similar products from the same category
   const similarProducts = Object.values(products)
     .filter(p => p.category === product.category && p.id !== product.id)
-    .slice(0, 4); // Show up to 4 similar products
+    .slice(0, 4);
 
   const handleAddToCart = () => {
     addToCart({ ...product, quantity });
     showToast(`${product.name} added to cart`);
+  };
+
+  const handleBuyNow = () => {
+    navigate('/buy-now', { state: { product, quantity } });
   };
 
   const showToast = (message) => {
@@ -64,9 +68,7 @@ function ProductPage() {
 
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-      {/* Product Details Section */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-        {/* Product Images */}
         <div className="space-y-4">
           <div className="relative bg-gray-100 rounded-lg overflow-hidden">
             <button
@@ -105,7 +107,6 @@ function ProductPage() {
           </div>
         </div>
 
-        {/* Product Info */}
         <div className="space-y-6">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">{product.name}</h1>
@@ -179,7 +180,7 @@ function ProductPage() {
               Add to Cart
             </button>
             <button
-              onClick={handleAddToCart}
+              onClick={handleBuyNow}
               className="w-full border border-indigo-600 text-indigo-600 py-3 rounded-lg 
                        hover:bg-indigo-50 transition-colors duration-200"
             >
@@ -216,7 +217,6 @@ function ProductPage() {
         </div>
       </div>
 
-      {/* Similar Products Section */}
       {similarProducts.length > 0 && (
         <div className="mt-16">
           <h2 className="text-2xl font-bold mb-8">Similar Products</h2>

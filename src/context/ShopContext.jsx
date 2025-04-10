@@ -1,8 +1,8 @@
 import React, { createContext, useState, useEffect } from 'react';
 
-const ShopContext = createContext();
+export const ShopContext = createContext();
 
-function ShopProvider({ children }) {
+export function ShopProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [wishlist, setWishlist] = useState([]);
   const [cartCount, setCartCount] = useState(0);
@@ -65,5 +65,3 @@ function ShopProvider({ children }) {
     </ShopContext.Provider>
   );
 }
-
-export { ShopContext, ShopProvider };

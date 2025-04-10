@@ -7,4 +7,4 @@ export function useShop() {
     throw new Error('useShop must be used within a ShopProvider');
   }
   return context;
-}
+} 

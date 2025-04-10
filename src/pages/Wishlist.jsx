@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { Heart, Trash2 } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
+import { useShop } from '../context/useShop';
 
 export default function Wishlist() {
   const { wishlist, toggleWishlist, addToCart } = useShop();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Filter, ChevronLeft, ChevronRight, Star, Heart, ShoppingCart } from 'lucide-react';
-import { useShop } from '../context/ShopContext';
+import { useShop } from '../context/useShop';
 import { products } from '../utils/productData';
 
 function CategoryPage() {
