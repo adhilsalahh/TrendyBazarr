@@ -31,7 +31,6 @@ import Layout from './components/Layout';
 import Products from './pages/Products';
 import CategoryPage from './pages/CategoryPage';
 import ProductPage from './pages/ProductPage';
-import AdminPanel from './pages/AdminPanel';
 
 function App() {
   const [isDarkMode, setIsDarkMode] = useState(false);
