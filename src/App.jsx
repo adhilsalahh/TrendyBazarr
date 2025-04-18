@@ -93,7 +93,6 @@ function App() {
               <Route path="/address-list" element={<AddressList />} />
               <Route path="/supplier/login" element={<SupplierLogin />} />
               <Route path="/supplier/register" element={<SupplierRegister />} />
-              <Route path="/admin/dashboard" element={<AdminPanel />} />
             </Routes>
             <Footer />
           </div>
